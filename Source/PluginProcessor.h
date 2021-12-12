@@ -56,33 +56,48 @@ template<typename ChainType, typename CoefficientType>
 void updateCutFilter(ChainType& leftLowCut,
   const CoefficientType& cutCoefficients,
   const Slope& lowCutSlope)
-  {
-    leftLowCut.template setBypassed<0>(true);
-    leftLowCut.template setBypassed<1>(true);
-    leftLowCut.template setBypassed<2>(true);
-    leftLowCut.template setBypassed<3>(true);
+{
+  leftLowCut.template setBypassed<0>(true);
+  leftLowCut.template setBypassed<1>(true);
+  leftLowCut.template setBypassed<2>(true);
+  leftLowCut.template setBypassed<3>(true);
 
-    switch (lowCutSlope)
+  switch (lowCutSlope)
+  {
+    case Slope_48:
     {
-      case Slope_48:
-      {
-        update<3>(leftLowCut, cutCoefficients);
-      }
-      case Slope_36:
-      {
-        update<2>(leftLowCut, cutCoefficients);
-      }
-      case Slope_24:
-      {
-        update<1>(leftLowCut, cutCoefficients);
-      }
-      case Slope_12:
-      {
-        update<0>(leftLowCut, cutCoefficients);
-      }
+      update<3>(leftLowCut, cutCoefficients);
+    }
+    case Slope_36:
+    {
+      update<2>(leftLowCut, cutCoefficients);
+    }
+    case Slope_24:
+    {
+      update<1>(leftLowCut, cutCoefficients);
+    }
+    case Slope_12:
+    {
+      update<0>(leftLowCut, cutCoefficients);
     }
   }
+}
 
+inline auto makeLowCutFilter(const ChainSettings& chainSettings, double sampleRate)
+{
+  return juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(
+    chainSettings.lowCutFreq,
+    sampleRate,
+    2*(chainSettings.lowCutSlope + 1));
+}
+
+inline auto makeHighCutFilter(const ChainSettings& chainSettings, double sampleRate)
+{
+  return juce::dsp::FilterDesign<float>::designIIRLowpassHighOrderButterworthMethod(
+    chainSettings.highCutFreq,
+    sampleRate,
+    2*(chainSettings.highCutSlope + 1));
+}
 //==============================================================================
 /**
 */
